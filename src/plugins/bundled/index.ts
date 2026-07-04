@@ -15,10 +15,12 @@
  */
 
 import { registerWeixinBuiltinPlugin } from './weixin.js'
+import { registerWechatyBuiltinPlugin } from './wechaty.js'
 
 /**
  * Initialize built-in plugins. Called during CLI startup.
  */
 export function initBuiltinPlugins(): void {
   registerWeixinBuiltinPlugin()
+  registerWechatyBuiltinPlugin()
 }

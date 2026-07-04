@@ -17,10 +17,38 @@ import type { Command } from '../commands.js'
 import type { BundledSkillDefinition } from '../skills/bundledSkills.js'
 import type { BuiltinPluginDefinition, LoadedPlugin } from '../types/plugin.js'
 import { getSettings_DEPRECATED } from '../utils/settings/settings.js'
+import { existsSync, readFileSync } from 'node:fs'
+import { homedir } from 'node:os'
+import { join } from 'node:path'
 
 const BUILTIN_PLUGINS: Map<string, BuiltinPluginDefinition> = new Map()
 
 export const BUILTIN_MARKETPLACE_NAME = 'builtin'
+
+/**
+ * Check if wechaty has a saved account with a puppet token.
+ * This is used to auto-enable the wechaty plugin when configured.
+ */
+function hasWechatyAccountFile(): boolean {
+  // Check env var first
+  if (process.env.WECHATY_PUPPET_SERVICE_TOKEN) {
+    return true
+  }
+  // Check account file
+  const stateDir =
+    process.env.WECHATY_STATE_DIR ?? join(homedir(), '.claude-wechaty')
+  const accountPath = join(stateDir, 'account.json')
+  if (!existsSync(accountPath)) {
+    return false
+  }
+  try {
+    const raw = readFileSync(accountPath, 'utf-8')
+    const account = JSON.parse(raw) as { puppetToken?: string }
+    return !!account.puppetToken
+  } catch {
+    return false
+  }
+}
 
 /**
  * Register a built-in plugin. Call this from initBuiltinPlugins() at startup.
@@ -69,11 +97,22 @@ export function getBuiltinPlugins(): {
 
     const pluginId = `${name}@${BUILTIN_MARKETPLACE_NAME}`
     const userSetting = settings?.enabledPlugins?.[pluginId]
-    // Enabled state: user preference > plugin default > true
+    // Check if plugin has config that warrants auto-enabling.
+    // For plugins with pluginConfigs in settings.json, auto-enable when configured.
+    const hasPluginConfig = settings?.pluginConfigs?.[pluginId] !== undefined
+    // For wechaty specifically, also check if account file exists (token saved).
+    // This is a special case since wechaty stores config in ~/.claude-wechaty/.
+    const hasWechatyAccount = name === 'wechaty' && hasWechatyAccountFile()
+    // Enabled state:
+    // 1. user preference (enabledPlugins) takes highest priority
+    // 2. if pluginConfigs exists or wechaty account exists, auto-enable
+    // 3. fall back to plugin default > true
     const isEnabled =
       userSetting !== undefined
         ? userSetting === true
-        : (definition.defaultEnabled ?? true)
+        : hasPluginConfig || hasWechatyAccount
+          ? true
+          : (definition.defaultEnabled ?? true)
 
     const plugin: LoadedPlugin = {
       name,

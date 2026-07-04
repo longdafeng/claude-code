@@ -34,6 +34,7 @@
         "@claude-code-best/agent-tools": "workspace:*",
         "@claude-code-best/builtin-tools": "workspace:*",
         "@claude-code-best/mcp-client": "workspace:*",
+        "@claude-code-best/wechaty-channel": "workspace:*",
         "@claude-code-best/weixin": "workspace:*",
         "@commander-js/extra-typings": "^14.0.0",
         "@growthbook/growthbook": "^1.6.5",
@@ -335,6 +336,13 @@
       "name": "url-handler-napi",
       "version": "1.0.0",
     },
+    "packages/wechaty": {
+      "name": "@claude-code-best/wechaty-channel",
+      "version": "1.0.0",
+      "dependencies": {
+        "qrcode": "^1.5.4",
+      },
+    },
     "packages/weixin": {
       "name": "@claude-code-best/weixin",
       "version": "1.0.0",
@@ -587,6 +595,8 @@
     "@claude-code-best/mcp-chrome-bridge": ["@claude-code-best/mcp-chrome-bridge@3.0.1", "", { "dependencies": { "@hono/node-server": "^1.19.13", "@modelcontextprotocol/sdk": "^1.11.0", "commander": "^13.1.0", "hono": "^4.12.12", "is-admin": "^4.0.0" }, "bin": { "mcp-chrome-bridge": "dist/cli.js", "mcp-chrome-stdio": "dist/mcp/mcp-server-stdio.js" } }, "sha512-ozeLHVOdckTUsWKJneJAL+CclrUlwVyBpfzFxgsrSL9f0LvjlJXE7+VcF5OmjDPwmZy6QNorvtg3/8NT2cIlzA=="],
 
     "@claude-code-best/mcp-client": ["@claude-code-best/mcp-client@workspace:packages/mcp-client"],
+
+    "@claude-code-best/wechaty-channel": ["@claude-code-best/wechaty-channel@workspace:packages/wechaty"],
 
     "@claude-code-best/weixin": ["@claude-code-best/weixin@workspace:packages/weixin"],
 
