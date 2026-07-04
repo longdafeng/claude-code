@@ -126,8 +126,10 @@ import type {
   SDKControlMcpSetServersResponse,
   SDKControlReloadPluginsResponse,
 } from 'src/entrypoints/sdk/controlTypes.js'
-import type { PermissionMode } from '@anthropic-ai/claude-agent-sdk'
-import type { PermissionMode as InternalPermissionMode } from 'src/types/permissions.js'
+import type {
+  ExternalPermissionMode,
+  PermissionMode,
+} from 'src/types/permissions.js'
 import { cwd } from 'process'
 import { getCwd } from 'src/utils/cwd.js'
 import omit from 'lodash-es/omit.js'
@@ -417,6 +419,7 @@ function trackReceivedMessageUuid(uuid: UUID): boolean {
   return true // new UUID
 }
 
+type SdkPermissionMode = ExternalPermissionMode | 'auto'
 type PromptValue = string | ContentBlockParam[]
 
 function toBlocks(v: PromptValue): ContentBlockParam[] {
@@ -1095,7 +1098,7 @@ function runHeadlessStreaming(
         type: 'system',
         subtype: 'status',
         status: null,
-        permissionMode: newMode as PermissionMode,
+        permissionMode: newMode as SdkPermissionMode,
         uuid: randomUUID(),
         session_id: getSessionId(),
       })
@@ -4801,7 +4804,7 @@ async function handleRewindFiles(
 }
 
 function handleSetPermissionMode(
-  request: { mode: InternalPermissionMode },
+  request: { mode: PermissionMode },
   requestId: string,
   toolPermissionContext: ToolPermissionContext,
   output: Stream<StdoutMessage>,

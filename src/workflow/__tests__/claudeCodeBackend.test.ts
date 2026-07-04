@@ -1,5 +1,21 @@
 import { expect, test, mock } from 'bun:test'
 
+let mockUuidCounter = 0
+let mockAgentIdCounter = 0
+
+function nextMockUuid() {
+  mockUuidCounter++
+  return `00000000-0000-4000-8000-${mockUuidCounter
+    .toString(16)
+    .padStart(12, '0')}`
+}
+
+function nextMockAgentId(label?: string) {
+  mockAgentIdCounter++
+  const suffix = mockAgentIdCounter.toString(16).padStart(16, '0')
+  return label ? `a${label}-${suffix}` : `a${suffix}`
+}
+
 // Note: mock specifier must resolve to the same module that impl actually imports (bun mock.module
 // matches by resolved module). impl uses '@claude-code-best/builtin-tools/...' and 'src/*' alias
 // path imports, so the same specifier is used here.
@@ -46,11 +62,12 @@ mock.module('src/utils/messages.js', () => ({
   ) => ({
     type: 'user' as const,
     message: { role: 'user', content: o.content },
+    uuid: nextMockUuid(),
     ...o,
   }),
   extractTextContent: () => 'agent-text',
 }))
-mock.module('src/utils/uuid.js', () => ({ createAgentId: () => 'agent-1' }))
+mock.module('src/utils/uuid.js', () => ({ createAgentId: nextMockAgentId }))
 mock.module('src/services/analytics/index.js', () => ({ logEvent: () => {} }))
 mock.module('src/utils/debug.js', () => ({ logForDebugging: () => {} }))
 
