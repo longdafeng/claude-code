@@ -156,34 +156,6 @@ async function main(): Promise<void> {
     return;
   }
 
-  if (args[0] === 'wechaty') {
-    profileCheckpoint('cli_wechaty_path');
-    const { handleWechatyCli } = await import('@claude-code-best/wechaty-channel');
-    const { enableConfigs } = await import('../utils/config.js');
-    const { initializeAnalyticsSink } = await import('../services/analytics/sink.js');
-    const { shutdownDatadog } = await import('../services/analytics/datadog.js');
-    const { shutdown1PEventLogging } = await import('../services/analytics/firstPartyEventLogger.js');
-    const { logForDebugging } = await import('../utils/debug.js');
-    const { ChannelPermissionRequestNotificationSchema } = await import('../services/mcp/channelNotification.js');
-    await handleWechatyCli(
-      args.slice(1),
-      {
-        enableConfigs,
-        initializeAnalyticsSink,
-        shutdownDatadog,
-        shutdown1PEventLogging,
-        logForDebugging,
-        registerPermissionHandler(server, handler) {
-          server.setNotificationHandler(ChannelPermissionRequestNotificationSchema(), async notification =>
-            handler(notification.params),
-          );
-        },
-      },
-      MACRO.VERSION,
-    );
-    return;
-  }
-
   // Fast-path for `--daemon-worker=<kind>` (internal — supervisor spawns this).
   // Must come before the daemon subcommand check: spawned per-worker, so
   // perf-sensitive. No enableConfigs(), no analytics sinks at this layer —
